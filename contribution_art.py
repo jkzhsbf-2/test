@@ -6,20 +6,25 @@ import pytz
 
 def purge_dummy_commits():
     """
-    Purge all dummy commits created by this script using a non-interactive rebase.
-    This will remove commits with the message "Contribution art".
+    Purge all dummy commits created by this script using `git filter-repo`.
+    This will remove commits with the message "Contribution art" completely from the history.
     """
     try:
-        # Use a non-interactive rebase to delete specific commits by resetting them
+        # Check if git-filter-repo is installed
+        subprocess.run(["git", "filter-repo", "--help"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # Run filter-repo to remove commits with the message "Contribution art"
         subprocess.run([
-            "git", "rebase", "--root", "--exec",
-            "git reset $(git rev-list --all --grep 'Contribution art')"
+            "git", "filter-repo", "--force",
+            "--message-callback",
+            "return b'' if b'Contribution art' in message else message"
         ], check=True)
 
-        # Push with force to overwrite history on the remote
-        subprocess.run(["git", "push", "--force", "origin", "main"], check=True)
+        # Push the rewritten history to GitHub, replacing the remote branch
+        subprocess.run(["git", "push", "--force", "--all", "origin"], check=True)
     except subprocess.CalledProcessError as e:
         print("Error during purge:", e)
+        print("Ensure `git-filter-repo` is installed by running 'pip install git-filter-repo' if not already installed.")
 
 def create_commit(date, commit_count):
     """
