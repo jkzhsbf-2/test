@@ -53,7 +53,10 @@ def generate_text_grid(text):
     max_height = 7
     max_width = 100
     font = get_resized_font(text, max_height, max_width)
-    text_width, text_height = font.getsize(text)
+
+    # Use getbbox to measure text width and height
+    text_bbox = font.getbbox(text)
+    text_width, text_height = text_bbox[2] - text_bbox[0], text_bbox[3] - text_bbox[1]
 
     # Create an image sized to the text width but limited to 100x7 for the GitHub grid
     image_width = min(text_width, max_width)
