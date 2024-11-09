@@ -35,7 +35,11 @@ def get_resized_font(text, max_height, max_width, initial_font_size=10):
             font = ImageFont.truetype("arial.ttf", font_size)  # Adjust this if Arial is not available on your system
         except OSError:
             font = ImageFont.load_default()  # Default font if TTF not found
-        text_width, text_height = font.getsize(text)
+
+        # Use getbbox to measure text width and height
+        text_bbox = font.getbbox(text)
+        text_width, text_height = text_bbox[2] - text_bbox[0], text_bbox[3] - text_bbox[1]
+
         if text_height > max_height or text_width > max_width:
             font_size -= 1  # Reduce font size if text is too big
             break
